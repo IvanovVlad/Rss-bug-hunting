@@ -17,17 +17,18 @@ const grid = document.getElementById("grid");
 const countEl = document.getElementById("count");
 
 function getFiltered() {
-  let result = products;
+  let result = [...products];
   const search = searchInput.value;
   const category = categorySelect.value;
   const sort = sortSelect.value;
 
   if (search) {
-    result = result.filter((p) => p.name === search);
+    const match = new RegExp(`${search.trim()}`, "gi");
+    result = result.filter(r => match.test(r.name));
   }
 
   if (category !== "all") {
-    result = products.filter((p) => p.category !== category);
+    result = result.filter((p) => p.category === category);
   }
 
   if (sort === "asc") {
@@ -41,6 +42,7 @@ function getFiltered() {
 
 function render() {
   const items = getFiltered();
+  grid.innerHTML = "";
   items.forEach((p) => {
     const card = document.createElement("div");
     card.className = "card";
@@ -57,3 +59,5 @@ sortSelect.addEventListener("change", render);
 resetBtn.addEventListener("click", () => {
   searchInput.value = "";
 });
+
+render();

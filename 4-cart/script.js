@@ -13,7 +13,6 @@ const productsEl = document.getElementById("products");
 const cartItemsEl = document.getElementById("cart-items");
 const badgeEl = document.getElementById("badge");
 const totalEl = document.getElementById("total");
-const totalElContainer = document.querySelector(".total");
 const emptyMsg = document.getElementById("empty-msg");
 const promoInput = document.getElementById("promo-input");
 const promoBtn = document.getElementById("promo-btn");
@@ -76,13 +75,19 @@ function applyPromo() {
 }
 
 function clearCart() {
-  cart.splice(0, 1);
+  cart = [];
   renderCart();
 }
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
   let total = 0;
+  if (!cart.length) {
+    const emptyCardText = document.createElement("div");
+    emptyCardText.classList.add("empty");
+    emptyCardText.innerText = "Корзина пуста";
+    cartItemsEl.appendChild(emptyCardText);
+  }
   cart.forEach((item) => {
     const lineTotal = item.price * item.qty;
     const li = document.createElement("li");
@@ -105,7 +110,6 @@ function renderCart() {
   }
 
   badgeEl.textContent = cart.reduce((acc, b) => acc + b.qty, 0);
-  totalElContainer.hidden = !total;
   totalEl.textContent = total;
   emptyMsg.hidden = true;
 }

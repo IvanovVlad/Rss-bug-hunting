@@ -24,7 +24,7 @@ function addTask() {
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
-  task.done = true;
+  task.done = !task.done;
   render();
 }
 
@@ -48,13 +48,13 @@ function updateCounter() {
 
 function render() {
   const visible = getVisibleTasks();
-  for (let i = 1; i <= visible.length; i++) {
+  list.replaceChildren();
+  for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
     li.className = "task";
-    if (task.done) {
-      li.classList.add("completed");
-    }
+    li.id = task.id;
+    li.setAttribute("done", !!task.done);
 
     const span = document.createElement("span");
     span.className = "task__text";

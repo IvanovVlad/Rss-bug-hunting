@@ -34,21 +34,35 @@ function deleteTask(id) {
 }
 
 function clearCompleted() {
-  tasks = [];
+  tasks = tasks.filter(t => !t.done);
   render();
 }
 
 function getVisibleTasks() {
-  return tasks;
+  return tasks.filter(t => {
+    switch (currentFilter) {
+      case "all":
+        return true;
+      case "active":
+        return !t.done;
+      case "done":
+        return !!t.done;
+    }
+  });
 }
 
 function updateCounter() {
-  counter.textContent = "Активных задач: " + tasks.length;
+  counter.textContent = "Активных задач: " + tasks.filter(t => !t.done).length;
 }
 
 function render() {
   const visible = getVisibleTasks();
   list.replaceChildren();
+  if (!visible.length) {
+    const noTasks = document.createElement("div");
+    noTasks.innerText = "Нет задач";
+    list.appendChild(noTasks);
+  }
   for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
@@ -80,7 +94,7 @@ filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
-    currentFilter = btn.dataset.filter;
+    currentFilter = btn.getAttribute("data-filter");
     render();
   });
 });

@@ -12,6 +12,10 @@ let nextId = 1;
 
 function addTask() {
   const text = input.value;
+  if (!text.trim().length) {
+    errorEl.hidden = false;
+    return;
+  }
   errorEl.hidden = true;
   tasks.push({ id: nextId++, text: text, done: false });
   input.value = "";
@@ -20,37 +24,51 @@ function addTask() {
 
 function toggleTask(id) {
   const task = tasks.find((t) => t.id === id);
-  task.done = true;
+  task.done = !task.done;
   render();
 }
 
 function deleteTask(id) {
-  tasks.filter((t) => t.id !== id);
+  tasks = tasks.filter((t) => t.id !== id);
   render();
 }
 
 function clearCompleted() {
-  tasks = [];
+  tasks = tasks.filter(t => !t.done);
   render();
 }
 
 function getVisibleTasks() {
-  return tasks;
+  return tasks.filter(t => {
+    switch (currentFilter) {
+      case "all":
+        return true;
+      case "active":
+        return !t.done;
+      case "done":
+        return !!t.done;
+    }
+  });
 }
 
 function updateCounter() {
-  counter.textContent = "Активных задач: " + tasks.length;
+  counter.textContent = "Активных задач: " + tasks.filter(t => !t.done).length;
 }
 
 function render() {
   const visible = getVisibleTasks();
-  for (let i = 1; i <= visible.length; i++) {
+  list.replaceChildren();
+  if (!visible.length) {
+    const noTasks = document.createElement("div");
+    noTasks.innerText = "Нет задач";
+    list.appendChild(noTasks);
+  }
+  for (let i = 0; i < visible.length; i++) {
     const task = visible[i];
     const li = document.createElement("li");
     li.className = "task";
-    if (task.done) {
-      li.classList.add("completed");
-    }
+    li.id = task.id;
+    li.setAttribute("done", !!task.done);
 
     const span = document.createElement("span");
     span.className = "task__text";
@@ -69,14 +87,14 @@ function render() {
   updateCounter();
 }
 
-addBtn.addEventListener("dblclick", addTask);
+addBtn.addEventListener("click", addTask);
 clearBtn.addEventListener("click", clearCompleted);
 
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     filterButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
-    currentFilter = btn.dataset.filter;
+    currentFilter = btn.getAttribute("data-filter");
     render();
   });
 });

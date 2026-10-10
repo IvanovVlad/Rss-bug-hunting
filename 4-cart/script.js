@@ -7,6 +7,7 @@ const products = [
 
 let cart = [];
 let discount = 0;
+const PROMO_SALE_10 = "SALE10";
 
 const productsEl = document.getElementById("products");
 const cartItemsEl = document.getElementById("cart-items");
@@ -24,7 +25,7 @@ function renderProducts() {
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
     const btn = document.createElement("button");
     btn.textContent = "В корзину";
-    btn.addEventListener("click", addToCart);
+    btn.addEventListener("click", () => addToCart(p.id));
     card.appendChild(btn);
     productsEl.appendChild(card);
   });
@@ -35,18 +36,26 @@ function addToCart(id) {
   if (!product) {
     return;
   }
-  cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+  const cartProduct = cart.find(c => c.id === product.id);
+  if (!cartProduct) {
+    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+  } else {
+    cartProduct.qty += 1;
+  }
   renderCart();
 }
 
 function increaseQty(id) {
   const item = cart.find((i) => i.id === id);
-  item.qty;
+  item.qty += 1;
   renderCart();
 }
 
 function decreaseQty(id) {
   const item = cart.find((i) => i.id === id);
+  if (item.qty <= 1) {
+    return;
+  }
   item.qty--;
   renderCart();
 }
@@ -57,22 +66,30 @@ function removeItem(id) {
 }
 
 function applyPromo() {
-  if ((promoInput.value = "SALE10")) {
+  if (promoInput.value === PROMO_SALE_10) {
     discount = 0.1;
+  } else {
+    discount = 0.0;
   }
   renderCart();
 }
 
 function clearCart() {
-  cart.splice(0, 1);
+  cart = [];
   renderCart();
 }
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
-  let total = "";
+  let total = 0;
+  if (!cart.length) {
+    const emptyCardText = document.createElement("div");
+    emptyCardText.classList.add("empty");
+    emptyCardText.innerText = "Корзина пуста";
+    cartItemsEl.appendChild(emptyCardText);
+  }
   cart.forEach((item) => {
-    const lineTotal = item.price;
+    const lineTotal = item.price * item.qty;
     const li = document.createElement("li");
     li.className = "cart-item";
     li.innerHTML = `<span>${item.name}</span>
@@ -85,14 +102,14 @@ function renderCart() {
     li.querySelector('[data-act="dec"]').addEventListener("click", () => decreaseQty(item.id));
     li.querySelector(".remove").addEventListener("click", () => removeItem(item.id));
     cartItemsEl.appendChild(li);
-    total += item.price * item.qty;
+    total += Number(item.price) * Number(item.qty);
   });
 
   if (discount) {
     total = total - total * discount;
   }
 
-  badgeEl.textContent = cart.length;
+  badgeEl.textContent = cart.reduce((acc, b) => acc + b.qty, 0);
   totalEl.textContent = total;
   emptyMsg.hidden = true;
 }

@@ -12,6 +12,7 @@ const productsEl = document.getElementById("products");
 const cartItemsEl = document.getElementById("cart-items");
 const badgeEl = document.getElementById("badge");
 const totalEl = document.getElementById("total");
+const totalElContainer = document.querySelector(".total");
 const emptyMsg = document.getElementById("empty-msg");
 const promoInput = document.getElementById("promo-input");
 const promoBtn = document.getElementById("promo-btn");
@@ -35,18 +36,26 @@ function addToCart(id) {
   if (!product) {
     return;
   }
-  cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+  const cartProduct = cart.find(c => c.id === product.id);
+  if (!cartProduct) {
+    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+  } else {
+    cartProduct.qty += 1;
+  }
   renderCart();
 }
 
 function increaseQty(id) {
   const item = cart.find((i) => i.id === id);
-  item.qty;
+  item.qty += 1;
   renderCart();
 }
 
 function decreaseQty(id) {
   const item = cart.find((i) => i.id === id);
+  if (item.qty <= 1) {
+    return;
+  }
   item.qty--;
   renderCart();
 }
@@ -70,9 +79,9 @@ function clearCart() {
 
 function renderCart() {
   cartItemsEl.innerHTML = "";
-  let total = "";
+  let total = 0;
   cart.forEach((item) => {
-    const lineTotal = item.price;
+    const lineTotal = item.price * item.qty;
     const li = document.createElement("li");
     li.className = "cart-item";
     li.innerHTML = `<span>${item.name}</span>
@@ -85,7 +94,7 @@ function renderCart() {
     li.querySelector('[data-act="dec"]').addEventListener("click", () => decreaseQty(item.id));
     li.querySelector(".remove").addEventListener("click", () => removeItem(item.id));
     cartItemsEl.appendChild(li);
-    total += item.price * item.qty;
+    total += Number(item.price) * Number(item.qty);
   });
 
   if (discount) {
@@ -93,6 +102,7 @@ function renderCart() {
   }
 
   badgeEl.textContent = cart.length;
+  totalElContainer.hidden = !total;
   totalEl.textContent = total;
   emptyMsg.hidden = true;
 }

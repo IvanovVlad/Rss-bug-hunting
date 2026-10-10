@@ -7,6 +7,7 @@ const products = [
 
 let cart = [];
 let discount = 0;
+const PROMO_SALE_10 = "SALE10";
 
 const productsEl = document.getElementById("products");
 const cartItemsEl = document.getElementById("cart-items");
@@ -66,8 +67,10 @@ function removeItem(id) {
 }
 
 function applyPromo() {
-  if ((promoInput.value = "SALE10")) {
+  if (promoInput.value === PROMO_SALE_10) {
     discount = 0.1;
+  } else {
+    discount = 0.0;
   }
   renderCart();
 }
